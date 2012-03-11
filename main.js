@@ -40,7 +40,7 @@ var HitPoint = enchant.Class.create(Group, {
         this._col = 10;
         this.sps = new Array(hitpoint);
         for (var i = 0, l = this.sps.length; i < l; i++) {
-            this.sps[i] = new Sprite(16,16);
+            this.sps[i] = new Sprite(16, 16);
             this.sps[i].image = image;
             this.sps[i].frame = this._frame;
             this.sps[i].x = i * 16;
@@ -49,7 +49,8 @@ var HitPoint = enchant.Class.create(Group, {
     },
     dec: function() {
         this.hitpoint--;
-        this.removeChild(this.sps[this.hitpoint]);
+        this.removeChild(this.lastChild);
+        //this.removeChild(this.sps[this.hitpoint]);
     },
     inc: function() {
         this.hitpoint++;
@@ -73,30 +74,6 @@ var HitPoint = enchant.Class.create(Group, {
     }
 });
 
-var Score = enchant.Class.create(MutableText, {
-    initialize: function() {
-        MutableText.call(this, 0, 0, game.width/2, 'score:0');
-        this._score = 0;
-    },
-    add: function(n) {
-        this._score += n;
-        this._update();
-    },
-    _update: function() {
-        this.text = this._score.toString();
-        this.setText('score:' + this.text);
-    },
-    value: {
-        get: function() {
-            return this._score;
-        },
-        set: function(n) {
-            this._score = n;
-            this._update();
-        }
-    }
-});
-
 var Enemy = enchant.Class.create(Sprite, {
     initialize: function() {
         Sprite.call(this, 16, 16);
@@ -108,7 +85,8 @@ var Enemy = enchant.Class.create(Sprite, {
         this.addEventListener('enterframe', function() {
             this.x -= 1;
             if (this.x <= -16) {
-                this.scene.removeChild(this);
+                this.parentNode.removeChild(this);
+                this.removeEventListener('enterframe', arguments.callee);
             }
         });
     }
@@ -125,7 +103,8 @@ var Bullet = enchant.Class.create(Sprite, {
         this.addEventListener('enterframe', function() {
             this.x -= 1;
             if (this.x <= -16) {
-                this.scene.removeChild(this);
+                this.parentNode.removeChild(this);
+                this.removeEventListener('enterframe', arguments.callee);
             }
         });
     }
@@ -142,24 +121,29 @@ var Gun = enchant.Class.create(Sprite, {
         this.addEventListener('enterframe', function() {
             this.x -= 1;
             if (this.x <= -16) {
-                this.scene.removeChild(this);
+                this.parentNode.removeChild(this);
+                this.removeEventListener('enterframe', arguments.callee);
             }
         });
     }
 });
 
 var Shot = enchant.Class.create(Sprite, {
-    initialize: function(x, y) {
+    initialize: function(x, y, sx, sy) {
         Sprite.call(this, 16, 16);
         this.image = game.assets['icon0.gif'];
         this.frame = 54;
         this.x = x;
         this.y = y;
+        this.sx = sx;
+        this.sy = sy;
 
         this.addEventListener('enterframe', function() {
-            this.x += 1;
+            this.x += this.sx;
+            this.y += this.sy;
             if (this.x >= 320) {
-                this.scene.removeChild(this);
+                this.parentNode.removeChild(this);
+                this.removeEventListener('enterframe', arguments.callee);
             }
         });
     }
@@ -177,6 +161,7 @@ var Player = enchant.Class.create(Sprite, {
     active: function() {
         if (!this.power) {
             var time = this.age + 30 * 5;
+            this.scale(2, 2);
             this.addEventListener('enterframe', function() {
                 this.power = true;
                 if (this.age % 30 == 0) {
@@ -184,15 +169,19 @@ var Player = enchant.Class.create(Sprite, {
                 }
                 if (this.age >= time) {
                     this.power = false;
+                    this.scale(0.5, 0.5);
                     this.removeEventListener('enterframe', arguments.callee);
                 }
             });
         }
     },
     shot: function() {
-        if (ammo.value >= 0) {
-            var shot = new Shot(this.x, this.y);
-            shots.addChild(shot);
+        if (ammo.value > 0) {
+            shots.addChild(new Shot(this.x, this.y, Math.sqrt(5), 0));
+            shots.addChild(new Shot(this.x, this.y, 1, -2));
+            shots.addChild(new Shot(this.x, this.y, 1, 2));
+            shots.addChild(new Shot(this.x, this.y, 2, -1));
+            shots.addChild(new Shot(this.x, this.y, 2, 1));
             ammo.dec();
         }
     }
@@ -228,11 +217,14 @@ var Level = enchant.Class.create({
 window.onload = function() {
     game = new Game(320, 320);
     game.preload('icon0.gif');
+    game.keybind(32, 'a');
     game.onload = function() {
 
         player = new Player();
 
-        scene = new Scene();
+        //scene = new Scene();
+        scene = game.rootScene;
+        scene.backgroundColor = '#ffaaff';
         scene.addChild(player);
         scene.addEventListener('enter', function() {
 
@@ -241,9 +233,7 @@ window.onload = function() {
             hitpoint = new HitPoint(3, game.assets['icon0.gif'], 10);
             hitpoint.y = 304;
             ammo = new HitPoint(5, game.assets['icon0.gif'], 48);
-            score = new Score();
-            score.x = 160;
-            score.y = 304;
+            score = new ScoreLabel(160, 304);
             currentLevel = new Level();
 
             var uis = new Group();
@@ -256,11 +246,11 @@ window.onload = function() {
             shots = new Group();
             guns = new Group();
 
-            this.addChild(uis);
             this.addChild(enemies);
             this.addChild(bullets);
             this.addChild(shots);
             this.addChild(guns);
+            this.addChild(uis);
         });
 
         scene.addEventListener('enterframe', function() {
@@ -321,7 +311,7 @@ window.onload = function() {
                     if (shot.intersect(enemy)) {
                         enemies.removeChild(enemy);
                         shots.removeChild(shot);
-                        score.value += 10;
+                        score.score += 10;
                     }
                 });
             });
