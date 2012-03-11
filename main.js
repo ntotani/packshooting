@@ -156,6 +156,8 @@ var Player = enchant.Class.create(Sprite, {
         this.image = game.assets['chara.png'];
         this.x = 160;
         this.y = 160;
+        this.sx = 0;
+        this.sy = 0;
         this.frame = 0;
         this.power = false;
         this.spd = 2;
@@ -211,6 +213,21 @@ var Player = enchant.Class.create(Sprite, {
 
             ammo.dec();
         }
+    },
+    move: function() {
+            this.x += this.sx;
+            this.y += this.sy;
+            this.sx = 0;
+            this.sy = 0;
+            if (this.x <= 0) {
+                this.x = 0;
+            } else if ( this.x >= 320) {
+                this.x = 320;
+            } if (this.y <= 0) {
+                this.y = 0;
+            } else if ( this.y >= 320) {
+                this.y = 320;
+            }
     }
 });
 
@@ -282,25 +299,30 @@ window.onload = function() {
             this.addChild(uis);
         });
 
+        var oldX = 0;
+        var oldY = 0;
         scene.addEventListener('touchstart', function(e) {
-            player.x = e.x;
-            player.y = e.y;
+            oldX = e.x;
+            oldY = e.y;
         });
         scene.addEventListener('touchmove', function(e) {
-            player.x = e.x;
-            player.y = e.y;
+            player.sx += e.x - oldX;
+            player.sy += e.y - oldY;
+            oldX = e.x;
+            oldY = e.y;
         });
 
         scene.addEventListener('enterframe', function() {
-            if (game.input.left && player.x >= 0) {
-                player.x -= player.spd;
-            } if (game.input.right && player.x <= 304) {
-                player.x += player.spd;
-            } if (game.input.up && player.y >= 0) {
-                player.y -= player.spd;
-            } if (game.input.down && player.y <= 304) {
-                player.y += player.spd;
+            if (game.input.left) {
+                player.sx -= player.spd;
+            } if (game.input.right) {
+                player.sx += player.spd;
+            } if (game.input.up) {
+                player.sy -= player.spd;
+            } if (game.input.down) {
+                player.sy += player.spd;
             }
+            player.move();
 
             var data = currentLevel.onframe(this.frame);
 
