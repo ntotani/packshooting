@@ -49,9 +49,7 @@ var HitPoint = enchant.Class.create(Group, {
     },
     dec: function() {
         this.hitpoint--;
-        //this.removeChild(this.lastChild);
-        this.sps[this.hitpoint].parentNode.removeChild(this.sps[this.hitpoint]);
-        //this.removeChild(this.sps[this.hitpoint]);
+        this.removeChild(this.sps[this.hitpoint]);
     },
     inc: function() {
         this.hitpoint++;
@@ -182,21 +180,25 @@ var Player = enchant.Class.create(Sprite, {
     },
     shot: function() {
         if (ammo.value > 0) {
-            shots.addChild(new Shot(this.x, this.y, Math.sqrt(2.5), -Math.sqrt(2.5), 55));
             shots.addChild(new Shot(this.x, this.y, Math.sqrt(5), 0, 54));
+            shots.addChild(new Shot(this.x, this.y, -Math.sqrt(5), 0, 50));
+            shots.addChild(new Shot(this.x, this.y, 0, Math.sqrt(5), 52));
+            shots.addChild(new Shot(this.x, this.y, 0, -Math.sqrt(5), 48));
+
+            shots.addChild(new Shot(this.x, this.y, Math.sqrt(2.5), -Math.sqrt(2.5), 55));
             shots.addChild(new Shot(this.x, this.y, Math.sqrt(2.5), Math.sqrt(2.5), 53));
+            shots.addChild(new Shot(this.x, this.y, -Math.sqrt(2.5), -Math.sqrt(2.5), 49));
+            shots.addChild(new Shot(this.x, this.y, -Math.sqrt(2.5), Math.sqrt(2.5), 51));
 
             shots.addChild(new Shot(this.x, this.y, 2, -1, 54));
             shots.addChild(new Shot(this.x, this.y, 2, 1, 54));
+            shots.addChild(new Shot(this.x, this.y, -2, -1, 50));
+            shots.addChild(new Shot(this.x, this.y, -2, 1, 50));
 
             shots.addChild(new Shot(this.x, this.y, -1, 2, 52));
-            shots.addChild(new Shot(this.x, this.y, 0, Math.sqrt(5), 52));
             shots.addChild(new Shot(this.x, this.y, 1, 2, 52));
-
             shots.addChild(new Shot(this.x, this.y, -1, -2, 48));
-            shots.addChild(new Shot(this.x, this.y, 0, -Math.sqrt(5), 48));
             shots.addChild(new Shot(this.x, this.y, 1, -2, 48));
-
 
             ammo.dec();
         }
@@ -304,7 +306,7 @@ window.onload = function() {
                     hitpoint.dec();
                     enemies.removeChild(enemy);
                     if (hitpoint.value <= 0) {
-                        game.end();
+                        game.end(score.score, score.score + 'point');
                     }
                 }
             });
