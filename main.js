@@ -49,7 +49,8 @@ var HitPoint = enchant.Class.create(Group, {
     },
     dec: function() {
         this.hitpoint--;
-        this.removeChild(this.lastChild);
+        //this.removeChild(this.lastChild);
+        this.sps[this.hitpoint].parentNode.removeChild(this.sps[this.hitpoint]);
         //this.removeChild(this.sps[this.hitpoint]);
     },
     inc: function() {
@@ -61,6 +62,7 @@ var HitPoint = enchant.Class.create(Group, {
             sp.x = (this.hitpoint-1) % this._col * 16;
             sp.y = parseInt((this.hitpoint-1) / this._col) * 16;
             this.sps.push(sp);
+            this.max++;
         }
         this.addChild(this.sps[this.hitpoint-1]);
     },
@@ -241,6 +243,7 @@ window.onload = function() {
         scene.backgroundColor = '#000000';
         scene.addChild(player);
         scene.addEventListener('enter', function() {
+            console.log('enter');
 
             this.frame = 0;
 
@@ -251,7 +254,7 @@ window.onload = function() {
             currentLevel = new Level();
 
             var uis = new Group();
-            uis.addChild(hitpoint);
+            game.rootScene.addChild(hitpoint);
             uis.addChild(ammo);
             uis.addChild(score);
 
@@ -332,9 +335,7 @@ window.onload = function() {
 
             this.frame ++;
         });
-
-
-        game.pushScene(scene);
+        //game.pushScene(scene);
     };
     game.start();
 };
