@@ -77,10 +77,11 @@ var HitPoint = enchant.Class.create(Group, {
 var Enemy = enchant.Class.create(Sprite, {
     initialize: function() {
         Sprite.call(this, 32, 32);
-        this.image = game.assets['enemy.png'];
+        this.image = game.assets['chara1.gif'];
         this.x = 320;
         this.y = Math.random() * 304;
-        this.frame = Math.floor(Math.random() * 4);
+        this.frame = Math.floor(Math.random() * 16);
+        this.scale(-1, 1);
 
         this.addEventListener('enterframe', function() {
             this.x -= 1;
@@ -151,9 +152,8 @@ var Shot = enchant.Class.create(Sprite, {
 
 var Player = enchant.Class.create(Sprite, {
     initialize: function() {
-        Sprite.call(this, 32, 32);
+        Sprite.call(this, 16, 16);
         this.image = game.assets['pac.png'];
-        this.scale(0.5, 0.5);
         this.x = 160;
         this.y = 160;
         this.frame = 0;
@@ -242,7 +242,7 @@ var Level = enchant.Class.create({
 
 window.onload = function() {
     game = new Game(320, 320);
-    game.preload('icon0.gif', 'pac.png', 'enemy.png');
+    game.preload('icon0.gif', 'pac.png', 'chara1.gif');
     game.keybind(32, 'a');
     game.onload = function() {
 
