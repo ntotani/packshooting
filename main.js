@@ -245,6 +245,7 @@ window.onload = function() {
     game = new Game(320, 320);
     game.preload('icon0.gif', 'chara.png', 'chara1.gif');
     game.keybind(32, 'a');
+    game.end = false;
     game.onload = function() {
 
         player = new Player();
@@ -324,7 +325,10 @@ window.onload = function() {
                     hitpoint.dec();
                     enemies.removeChild(enemy);
                     if (hitpoint.value <= 0) {
-                        game.end(score.score, score.score + 'point');
+                        if (!game.end) {
+                            game.end(score.score, score.score + 'point');
+                            game.end = true;
+                        }
                     }
                 }
             });
