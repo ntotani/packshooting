@@ -169,15 +169,16 @@ var Player = enchant.Class.create(Sprite, {
     },
     active: function() {
         if (!this.power) {
-            var time = this.age + 30 * 5;
             this.scale(2, 2);
             this.addEventListener('enterframe', function() {
                 this.power = true;
                 this.spd = 4;
                 if (this.age % 30 == 0) {
                     this.shot();
+                    console.log(ammo.value);
                 }
-                if (this.age >= time) {
+                if (ammo.value <= 0) {
+                    console.log(ammo.value);
                     this.power = false;
                     this.spd = 2;
                     this.scale(0.5, 0.5);
@@ -278,6 +279,15 @@ window.onload = function() {
             this.addChild(shots);
             this.addChild(guns);
             this.addChild(uis);
+        });
+
+        scene.addEventListener('touchstart', function(e) {
+            player.x = e.x;
+            player.y = e.y;
+        });
+        scene.addEventListener('touchmove', function(e) {
+            player.x = e.x;
+            player.y = e.y;
         });
 
         scene.addEventListener('enterframe', function() {
