@@ -17,12 +17,13 @@ var HitPoint = enchant.Class.create(Group, {
         this.max = hitpoint;
         this.image = image;
         this._frame = frame;
+        this._col = 10;
         this.sps = new Array(hitpoint);
         for (var i = 0, l = this.sps.length; i < l; i++) {
             this.sps[i] = new Sprite(16,16);
             this.sps[i].image = image;
             this.sps[i].frame = this._frame;
-            this.sps[i].x = i*18;
+            this.sps[i].x = i * 16;
             this.addChild(this.sps[i]);
         }
     },
@@ -36,7 +37,8 @@ var HitPoint = enchant.Class.create(Group, {
             var sp = new Sprite(16, 16);
             sp.image = this.image;
             sp.frame = this._frame;
-            sp.x = (this.hitpoint-1) * 18;
+            sp.x = (this.hitpoint-1) % this._col * 16;
+            sp.y = parseInt((this.hitpoint-1) / this._col) * 16;
             this.sps.push(sp);
         }
             this.addChild(this.sps[this.hitpoint-1]);
@@ -77,21 +79,44 @@ var Bullet = enchant.Class.create(Sprite, {
     }
 });
 
+var Gun = enchant.Class.create(Sprite, {
+    initialize: function() {
+        Sprite.call(this, 16, 16);
+        this.image = game.assets['icon0.gif'];
+        this.x = 320;
+        this.y = Math.random() * 304;
+        this.frame = 30;
+
+        this.addEventListener('enterframe', function() {
+            this.x -= 1;
+            if (this.x <= -16) {
+                this.scene.removeChild(this);
+            }
+        });
+    }
+});
+
 var Level = enchant.Class.create({
     initalize: function() {
     },
     onframe: function(frame) {
-        if (frame % 30 == 0) {
+        if (frame % 300 == 299) {
+            return {
+                enemy: [],
+                bullet: [],
+                gun: [new Gun()]
+            }
+        } else if (frame % 30 == 0) {
             return {
                 enemy: [new Enemy()],
                 bullet: [new Bullet()],
-                hoge: []
+                gun: []
             }
         } else {
             return {
                 enemy: [],
                 bullet: [],
-                hoge: []
+                gun: []
             }
         }
     }
@@ -128,10 +153,12 @@ window.onload = function() {
 
             enemies = new Group();
             bullets = new Group();
+            guns = new Group();
 
             this.addChild(uis);
             this.addChild(enemies);
             this.addChild(bullets);
+            this.addChild(guns);
         });
 
         scene.addEventListener('enterframe', function() {
@@ -155,7 +182,10 @@ window.onload = function() {
                     data[prop].forEach(function(children) {
                         bullets.addChild(children);
                     });
-                } else {
+                } else if (prop == 'gun') {
+                    data[prop].forEach(function(children) {
+                        guns.addChild(children);
+                    });
                 }
             };
 
@@ -163,13 +193,21 @@ window.onload = function() {
                 if (player.intersect(enemy)) {
                     hitpoint.dec();
                     enemies.removeChild(enemy);
+                    console.log('hit enemy');
                 }
             });
 
             bullets.childNodes.forEach(function(bullet) {
                 if (player.intersect(bullet)) {
                     ammo.inc();
-                    enemies.removeChild(bullet);
+                    bullets.removeChild(bullet);
+                    console.log('hit ammo');
+                }
+            });
+
+            guns.childNodes.forEach(function(gun) {
+                if (player.intersect(gun)) {
+                    guns.removeChild(gun);
                 }
             });
 
