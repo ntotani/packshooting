@@ -11,6 +11,25 @@ var enemies;
 var bullets;
 var shots;
 
+var SplashSprite = enchant.Class.create(Sprite, {
+    initialize: function(x, y) {
+        var game = enchant.Game.instance;
+        Sprite.call(this, image.width, image.height);
+        this.x = x;
+        this.y = y;
+        this.image = game.assets['effect0.gif'];
+        game.currentScene.addChild(this);
+        this.addEventListener('enterframe', function() {
+            if (this.age % 4 == 0) {
+                this.frame++;
+            } if (this.age > 15) {
+                this.scene.removeChild(this);
+                this.removeEventListener('enterframe', arguments.callee);
+            }
+        });
+    }
+});
+
 var HitPoint = enchant.Class.create(Group, {
     initialize: function(hitpoint, image, frame) {
         Group.call(this);
@@ -42,7 +61,7 @@ var HitPoint = enchant.Class.create(Group, {
             sp.y = parseInt((this.hitpoint-1) / this._col) * 16;
             this.sps.push(sp);
         }
-            this.addChild(this.sps[this.hitpoint-1]);
+        this.addChild(this.sps[this.hitpoint-1]);
     },
     value: {
         get: function() {
@@ -50,6 +69,30 @@ var HitPoint = enchant.Class.create(Group, {
         },
         set: function(value) {
             //this.hitpoint = value;
+        }
+    }
+});
+
+var Score = enchant.Class.create(MutableText, {
+    initialize: function() {
+        MutableText.call(this, 0, 0, game.width/2, 'score:0');
+        this._score = 0;
+    },
+    add: function(n) {
+        this._score += n;
+        this._update();
+    },
+    _update: function() {
+        this.text = this._score.toString();
+        this.setText('score:' + this.text);
+    },
+    value: {
+        get: function() {
+            return this._score;
+        },
+        set: function(n) {
+            this._score = n;
+            this._update();
         }
     }
 });
@@ -109,7 +152,7 @@ var Shot = enchant.Class.create(Sprite, {
     initialize: function(x, y) {
         Sprite.call(this, 16, 16);
         this.image = game.assets['icon0.gif'];
-        this.frame = 45;
+        this.frame = 54;
         this.x = x;
         this.y = y;
 
@@ -198,7 +241,9 @@ window.onload = function() {
             hitpoint = new HitPoint(3, game.assets['icon0.gif'], 10);
             hitpoint.y = 304;
             ammo = new HitPoint(5, game.assets['icon0.gif'], 48);
-            score = new ScoreLabel(160, 304);
+            score = new Score();
+            score.x = 160;
+            score.y = 304;
             currentLevel = new Level();
 
             var uis = new Group();
@@ -234,7 +279,7 @@ window.onload = function() {
             for (prop in data) {
                 if (prop == 'enemy') {
                     data[prop].forEach(function(children) {
-                        scene.addChild(children);
+                        enemies.addChild(children);
                     });
                 } else if (prop == 'bullet') {
                     data[prop].forEach(function(children) {
@@ -251,7 +296,9 @@ window.onload = function() {
                 if (player.intersect(enemy)) {
                     hitpoint.dec();
                     enemies.removeChild(enemy);
-                    console.log('hit enemy');
+                    if (hitpoint.value <= 0) {
+                        game.end();
+                    }
                 }
             });
 
@@ -259,7 +306,6 @@ window.onload = function() {
                 if (player.intersect(bullet)) {
                     ammo.inc();
                     bullets.removeChild(bullet);
-                    console.log('hit ammo');
                 }
             });
 
@@ -268,6 +314,16 @@ window.onload = function() {
                     guns.removeChild(gun);
                     player.active();
                 }
+            });
+
+            shots.childNodes.forEach(function(shot) {
+                enemies.childNodes.forEach(function(enemy) {
+                    if (shot.intersect(enemy)) {
+                        enemies.removeChild(enemy);
+                        shots.removeChild(shot);
+                        score.value += 10;
+                    }
+                });
             });
 
             this.frame ++;
