@@ -129,10 +129,10 @@ var Gun = enchant.Class.create(Sprite, {
 });
 
 var Shot = enchant.Class.create(Sprite, {
-    initialize: function(x, y, sx, sy) {
+    initialize: function(x, y, sx, sy, frame) {
         Sprite.call(this, 16, 16);
         this.image = game.assets['icon0.gif'];
-        this.frame = 54;
+        this.frame = frame;
         this.x = x;
         this.y = y;
         this.sx = sx;
@@ -157,6 +157,7 @@ var Player = enchant.Class.create(Sprite, {
         this.y = 160;
         this.frame = 70;
         this.power = false;
+        this.spd = 2;
     },
     active: function() {
         if (!this.power) {
@@ -164,11 +165,13 @@ var Player = enchant.Class.create(Sprite, {
             this.scale(2, 2);
             this.addEventListener('enterframe', function() {
                 this.power = true;
+                this.spd = 4;
                 if (this.age % 30 == 0) {
                     this.shot();
                 }
                 if (this.age >= time) {
                     this.power = false;
+                    this.spd = 2;
                     this.scale(0.5, 0.5);
                     this.removeEventListener('enterframe', arguments.callee);
                 }
@@ -177,11 +180,22 @@ var Player = enchant.Class.create(Sprite, {
     },
     shot: function() {
         if (ammo.value > 0) {
-            shots.addChild(new Shot(this.x, this.y, Math.sqrt(5), 0));
-            shots.addChild(new Shot(this.x, this.y, 1, -2));
-            shots.addChild(new Shot(this.x, this.y, 1, 2));
-            shots.addChild(new Shot(this.x, this.y, 2, -1));
-            shots.addChild(new Shot(this.x, this.y, 2, 1));
+            shots.addChild(new Shot(this.x, this.y, Math.sqrt(2.5), -Math.sqrt(2.5), 55));
+            shots.addChild(new Shot(this.x, this.y, Math.sqrt(5), 0, 54));
+            shots.addChild(new Shot(this.x, this.y, Math.sqrt(2.5), Math.sqrt(2.5), 53));
+
+            shots.addChild(new Shot(this.x, this.y, 2, -1, 54));
+            shots.addChild(new Shot(this.x, this.y, 2, 1, 54));
+
+            shots.addChild(new Shot(this.x, this.y, -1, 2, 52));
+            shots.addChild(new Shot(this.x, this.y, 0, Math.sqrt(5), 52));
+            shots.addChild(new Shot(this.x, this.y, 1, 2, 52));
+
+            shots.addChild(new Shot(this.x, this.y, -1, -2, 48));
+            shots.addChild(new Shot(this.x, this.y, 0, -Math.sqrt(5), 48));
+            shots.addChild(new Shot(this.x, this.y, 1, -2, 48));
+
+
             ammo.dec();
         }
     }
@@ -224,7 +238,7 @@ window.onload = function() {
 
         //scene = new Scene();
         scene = game.rootScene;
-        scene.backgroundColor = '#ffaaff';
+        scene.backgroundColor = '#000000';
         scene.addChild(player);
         scene.addEventListener('enter', function() {
 
@@ -255,13 +269,13 @@ window.onload = function() {
 
         scene.addEventListener('enterframe', function() {
             if (game.input.left) {
-                player.x -= 2;
+                player.x -= player.spd;
             } if (game.input.right) {
-                player.x += 2;
+                player.x += player.spd;
             } if (game.input.up) {
-                player.y -= 2;
+                player.y -= player.spd;
             } if (game.input.down) {
-                player.y += 2;
+                player.y += player.spd;
             }
 
             var data = currentLevel.onframe(this.frame);
