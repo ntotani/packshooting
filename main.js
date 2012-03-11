@@ -151,13 +151,21 @@ var Shot = enchant.Class.create(Sprite, {
 
 var Player = enchant.Class.create(Sprite, {
     initialize: function() {
-        Sprite.call(this, 16, 16);
-        this.image = game.assets['icon0.gif'];
+        Sprite.call(this, 32, 32);
+        this.image = game.assets['pac.png'];
+        this.scale(0.5, 0.5);
         this.x = 160;
         this.y = 160;
-        this.frame = 70;
+        this.frame = 0;
         this.power = false;
         this.spd = 2;
+        this.addEventListener('enterframe', function() {
+            if (this.age % 10 > 5) {
+                this.frame = 1;
+            } else {
+                this.frame = 0;
+            }
+        });
     },
     active: function() {
         if (!this.power) {
@@ -234,7 +242,7 @@ var Level = enchant.Class.create({
 
 window.onload = function() {
     game = new Game(320, 320);
-    game.preload('icon0.gif');
+    game.preload('icon0.gif', 'pac.png');
     game.keybind(32, 'a');
     game.onload = function() {
 
@@ -273,13 +281,13 @@ window.onload = function() {
         });
 
         scene.addEventListener('enterframe', function() {
-            if (game.input.left) {
+            if (game.input.left && player.x >= 0) {
                 player.x -= player.spd;
-            } if (game.input.right) {
+            } if (game.input.right && player.x <= 304) {
                 player.x += player.spd;
-            } if (game.input.up) {
+            } if (game.input.up && player.y >= 0) {
                 player.y -= player.spd;
-            } if (game.input.down) {
+            } if (game.input.down && player.y <= 304) {
                 player.y += player.spd;
             }
 
