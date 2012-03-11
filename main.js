@@ -153,7 +153,7 @@ var Shot = enchant.Class.create(Sprite, {
 var Player = enchant.Class.create(Sprite, {
     initialize: function() {
         Sprite.call(this, 16, 16);
-        this.image = game.assets['pac.png'];
+        this.image = game.assets['chara.png'];
         this.x = 160;
         this.y = 160;
         this.frame = 0;
@@ -243,7 +243,7 @@ var Level = enchant.Class.create({
 
 window.onload = function() {
     game = new Game(320, 320);
-    game.preload('icon0.gif', 'pac.png', 'chara1.gif');
+    game.preload('icon0.gif', 'chara.png', 'chara1.gif');
     game.keybind(32, 'a');
     game.onload = function() {
 
