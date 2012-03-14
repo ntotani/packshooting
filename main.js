@@ -94,15 +94,17 @@ var Enemy = enchant.Class.create(Sprite, {
 });
 
 var Bullet = enchant.Class.create(Sprite, {
-    initialize: function() {
+    initialize: function(x, y) {
         Sprite.call(this, 16, 16);
         this.image = game.assets['icon0.gif'];
         this.x = 320;
         this.y = Math.random() * 304;
+        if(arguments.length > 0) this.x = x;
+        if(arguments.length > 1) this.y = y;
         this.frame = 45;
 
         this.addEventListener('enterframe', function() {
-            this.x -= 1;
+            this.x -= 2;
             if (this.x <= -16) {
                 this.parentNode.removeChild(this);
                 this.removeEventListener('enterframe', arguments.callee);
@@ -112,15 +114,17 @@ var Bullet = enchant.Class.create(Sprite, {
 });
 
 var Gun = enchant.Class.create(Sprite, {
-    initialize: function() {
+    initialize: function(x, y) {
         Sprite.call(this, 16, 16);
         this.image = game.assets['icon0.gif'];
         this.x = 320;
         this.y = Math.random() * 304;
+        if(arguments.length > 0) this.x = x;
+        if(arguments.length > 1) this.y = y;
         this.frame = 30;
 
         this.addEventListener('enterframe', function() {
-            this.x -= 1;
+            this.x -= 2;
             if (this.x <= -16) {
                 this.parentNode.removeChild(this);
                 this.removeEventListener('enterframe', arguments.callee);
@@ -140,8 +144,8 @@ var Shot = enchant.Class.create(Sprite, {
         this.sy = sy;
 
         this.addEventListener('enterframe', function() {
-            this.x += this.sx;
-            this.y += this.sy;
+            this.x += this.sx * 2;
+            this.y += this.sy * 2;
             if (this.x >= 320) {
                 this.parentNode.removeChild(this);
                 this.removeEventListener('enterframe', arguments.callee);
@@ -277,7 +281,7 @@ window.onload = function() {
 
             hitpoint = new HitPoint(3, game.assets['icon0.gif'], 10);
             hitpoint.y = 304;
-            ammo = new HitPoint(5, game.assets['icon0.gif'], 48);
+            ammo = new HitPoint(1, game.assets['icon0.gif'], 48);
             score = new ScoreLabel(160, 304);
             currentLevel = new Level();
 
@@ -342,7 +346,7 @@ window.onload = function() {
             };
 
             enemies.childNodes.forEach(function(enemy) {
-                if (player.intersect(enemy)) {
+                if (player.within(enemy)) {
                     hitpoint.dec();
                     enemies.removeChild(enemy);
                     if (hitpoint.value <= 0) {
